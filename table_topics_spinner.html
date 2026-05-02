@@ -367,21 +367,21 @@ const topics = [
     icon: "☕",
     label: "Chai\nvs Coffee",
     title: "Chai vs Coffee",
-    scenario: "Two people trying to convert each other — emotion vs productivity.",
+    scenario: "Two people trying to convert each other / emotion vs productivity.",
     prompt: 'Defend your brew to the last sip!'
   },
   {
     icon: "📱",
     label: "iPhone\nvs Android",
     title: "iPhone vs Android",
-    scenario: "Two friends buying a new phone — premium vs practicality debate.",
+    scenario: "Two friends buying a new phone / premium vs practicality debate.",
     prompt: '"iPhone is a lifestyle." "Android is freedom." "One is status, one is smartness."'
   },
   {
     icon: "💻",
     label: "WFH\nvs Office",
     title: "Work From Home vs Office",
-    scenario: "A company deciding permanent work culture — comfort vs career growth.",
+    scenario: "A company deciding permanent work culture / comfort vs career growth.",
     prompt: '"WFH: where camera off = life on." "Office: where coffee free, but peace costly."'
   },
   {
@@ -403,7 +403,7 @@ const topics = [
     label: "Shakespeare\nvs Karan Johar",
     title: "William Shakespeare vs Karan Johar",
     scenario: "The king of classic literature meets the king of Bollywood drama.",
-    prompt: 'Debate storytelling — deep tragedy vs dramatic family emotions.'
+    prompt: 'Debate storytelling - deep tragedy vs dramatic family emotions.'
   },
   {
     icon: "🎥",
@@ -416,14 +416,14 @@ const topics = [
     icon: "🌴",
     label: "Goa\nvs Mumbai",
     title: "Goa vs Mumbai",
-    scenario: "Trip planning — only one destination allowed.",
+    scenario: "Trip planning / only one destination allowed.",
     prompt: '"Goa: susegad life." "Mumbai: struggle life."'
   },
   {
     icon: "⏳",
     label: "Gandhi\nvs Kejriwal",
     title: "Mahatma Gandhi vs Arvind Kejriwal",
-    scenario: "Freedom fighter meets modern politician — Old India vs New India debate.",
+    scenario: "Freedom fighter meets modern politician / Old India vs New India debate.",
     prompt: '"Main satyagraha karta tha." "Main subsidy graha karta hoon."'
   },
   {
@@ -431,11 +431,11 @@ const topics = [
     label: "Einstein\nvs Elon Musk",
     title: "Albert Einstein vs Elon Musk",
     scenario: "The father of modern physics meets the face of futuristic tech.",
-    prompt: 'Theory vs execution — who changed the world more?'
+    prompt: 'Theory vs execution - who changed the world more?'
   }
 ];
 
-// Sector colors — vibrant festival palette
+// Sector colors - vibrant festival palette
 const sectorColors = [
   "#FF6B35","#FFD700","#2ECC71","#00BCD4","#9B59B6",
   "#FF3D7F","#F39C12","#1ABC9C","#E74C3C","#3498DB"
@@ -528,7 +528,7 @@ function drawWheel(angle) {
     ctx.lineWidth = 1.5;
     ctx.stroke();
 
-    // Icon only — labels hidden to keep audience in suspense
+    // Icon only - labels hidden to keep audience in suspense
     ctx.save();
     ctx.translate(cx, cy);
     ctx.rotate(mid);
@@ -562,7 +562,7 @@ drawWheel(currentAngle);
 updateCountBadge();
 
 // ──────────────────────────────────────
-// AUDIO — Lo-Fi Hip-Hop System
+// AUDIO - Lo-Fi Hip-Hop System
 // ──────────────────────────────────────
 let audioCtx = null;
 let musicOn  = true;
@@ -575,7 +575,7 @@ const BEAT = 60 / BPM;          // ~0.732 s
 const BAR  = BEAT * 4;          // ~2.927 s
 const SWING = BEAT * 0.055;     // subtle swing on 8th offbeats
 
-// Chord progression — each chord lasts 2 bars, loops every 8 bars
+// Chord progression - each chord lasts 2 bars, loops every 8 bars
 // Voicings: bass (low), mid-piano, top-piano
 const CHORDS = [
   { b: 65.41,  mid: [261.63, 329.63, 392.00], top: [523.25, 659.25] }, // Cmaj7
@@ -841,7 +841,7 @@ function playTickSound() {
   o.start(t); o.stop(t + 0.07);
 }
 
-// ── Win fanfare — warm lo-fi chord reveal ─────────
+// ── Win fanfare - warm lo-fi chord reveal ─────────
 function playWinFanfare() {
   const ac  = getAudioCtx();
   const rev = makeReverb(ac, 2.2, 0.5);
@@ -857,7 +857,7 @@ function playWinFanfare() {
   });
 }
 
-// ── Spin tension — lo-fi filter sweep swell ───────
+// ── Spin tension - lo-fi filter sweep swell ───────
 function playDrumRoll(duration) {
   const ac = getAudioCtx();
   // Rising filtered noise swell (tape-style)
