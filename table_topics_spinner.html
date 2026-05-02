@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎯 Table Topics Spinner</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;800&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d1a;
+    --gold: #FFD700;
+    --orange: #FF6B35;
+    --pink: #FF3D7F;
+    --cyan: #00F5FF;
+    --purple: #9B59B6;
+    --green: #2ECC71;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Baloo 2', cursive;
+    color: #fff;
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ── Starfield ── */
+  #stars {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at center, #1a1a3a 0%, #0d0d1a 100%);
+  }
+  .star {
+    position: absolute;
+    border-radius: 50%;
+    background: #fff;
+    animation: twinkle var(--d) ease-in-out infinite alternate;
+  }
+  @keyframes twinkle { from { opacity: .2; transform: scale(1); } to { opacity: 1; transform: scale(1.4); } }
+
+  /* ── Header ── */
+  #header {
+    position: relative; z-index: 10;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  #header h1 {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 800;
+    background: linear-gradient(90deg, var(--gold), var(--orange), var(--pink), var(--cyan));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
+    animation: hueShift 4s linear infinite;
+    background-size: 300%;
+  }
+  @keyframes hueShift { 0%{background-position:0%} 100%{background-position:300%} }
+  #header p {
+    font-size: 1rem; color: #aaa; letter-spacing: 2px; text-transform: uppercase;
+  }
+
+  /* ── Main layout ── */
+  #main {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: center; gap: 30px;
+    flex-wrap: wrap;
+    width: 100%; max-width: 1100px;
+    padding: 0 10px;
+  }
+
+  /* ── Wheel wrapper ── */
+  #wheel-wrap {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center;
+    padding-top: 40px;
+  }
+
+  /* Glow ring behind wheel */
+  #wheel-wrap::before {
+    content: '';
+    position: absolute;
+    top: calc(50% + 20px); left: 50%; transform: translate(-50%,-50%);
+    width: 380px; height: 380px;
+    border-radius: 50%;
+    background: conic-gradient(from 0deg, #FF6B35, #FFD700, #2ECC71, #00F5FF, #9B59B6, #FF3D7F, #FF6B35);
+    filter: blur(30px);
+    opacity: .45;
+    animation: rotateSlow 8s linear infinite;
+  }
+  @keyframes rotateSlow { to { transform: translate(-50%,-50%) rotate(360deg); } }
+
+  /* Pointer */
+  #pointer {
+    position: absolute;
+    top: -10px; left: 50%;
+    transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 20px solid var(--gold);
+    filter: drop-shadow(0 0 5px var(--gold));
+    z-index: 20;
+  }
+
+  canvas#wheel {
+    border-radius: 50%;
+    box-shadow: 0 0 40px rgba(255,215,0,.3), 0 0 80px rgba(255,107,53,.15);
+    display: block;
+    position: relative; z-index: 10;
+  }
+
+  /* Center button */
+  #spinBtn {
+    margin-top: 20px;
+    padding: 14px 50px;
+    border: none; border-radius: 50px;
+    background: linear-gradient(135deg, var(--orange), var(--pink));
+    color: #fff;
+    font-family: 'Baloo 2', cursive;
+    font-size: 1.2rem; font-weight: 800;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    box-shadow: 0 6px 30px rgba(255,61,127,.5);
+    transition: transform .15s, box-shadow .15s;
+    position: relative; z-index: 10;
+  }
+  #spinBtn:hover:not(:disabled) { transform: translateY(-3px) scale(1.04); box-shadow: 0 10px 40px rgba(255,61,127,.7); }
+  #spinBtn:active:not(:disabled) { transform: scale(.97); }
+  #spinBtn:disabled { opacity: .6; cursor: not-allowed; }
+
+  /* ── Topic panel ── */
+  #topic-panel {
+    width: 340px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 24px;
+    padding: 28px 24px;
+    backdrop-filter: blur(12px);
+    min-height: 340px;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    text-align: center;
+    position: relative; overflow: hidden;
+  }
+  #topic-panel::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,107,53,.08), rgba(255,61,127,.08));
+    pointer-events: none;
+  }
+
+  #topic-icon { font-size: 3.5rem; margin-bottom: 10px; animation: bounceIn .5s ease; }
+  #topic-title {
+    font-size: 1.4rem; font-weight: 800; color: var(--gold);
+    margin-bottom: 12px; line-height: 1.3;
+    animation: slideUp .4s ease;
+  }
+  #topic-scenario {
+    font-size: .9rem; color: #ddd; line-height: 1.6;
+    animation: fadeIn .6s ease;
+  }
+  #topic-prompt {
+    margin-top: 14px;
+    font-size: .85rem; color: var(--cyan);
+    font-style: italic; line-height: 1.5;
+    animation: fadeIn .8s ease;
+  }
+  #idle-msg {
+    font-size: 1.1rem; color: #555;
+    font-weight: 600;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+  @keyframes bounceIn { 0%{transform:scale(0)} 70%{transform:scale(1.2)} 100%{transform:scale(1)} }
+  @keyframes slideUp { from{transform:translateY(20px);opacity:0} to{transform:translateY(0);opacity:1} }
+  @keyframes fadeIn { from{opacity:0} to{opacity:1} }
+
+  /* ── Confetti ── */
+  .confetti {
+    position: fixed;
+    width: 10px; height: 14px;
+    top: -20px;
+    border-radius: 2px;
+    animation: fall linear forwards;
+    pointer-events: none; z-index: 999;
+  }
+  @keyframes fall {
+    0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  /* ── Music toggle ── */
+  #musicBtn {
+    position: fixed; bottom: 20px; right: 20px; z-index: 100;
+    background: rgba(255,255,255,.1);
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 50%; width: 50px; height: 50px;
+    font-size: 1.4rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(10px);
+    transition: all .2s;
+  }
+  #musicBtn:hover { background: rgba(255,255,255,.2); transform: scale(1.1); }
+
+  /* ── Spin flash ── */
+  #flash {
+    position: fixed; inset: 0;
+    background: rgba(255,215,0,.15);
+    pointer-events: none; z-index: 500;
+    opacity: 0;
+    transition: opacity .3s;
+  }
+  #flash.active { opacity: 1; }
+
+  /* ── Topics list hidden ── */
+  #topics-list { display: none; }
+
+  /* ── Controls bar ── */
+  #controls {
+    display: flex; align-items: center; gap: 14px;
+    margin-top: 14px;
+    flex-wrap: wrap; justify-content: center;
+  }
+
+  /* Toggle switch */
+  .toggle-wrap {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(255,255,255,.12);
+    border-radius: 40px;
+    padding: 8px 16px;
+    cursor: pointer;
+    user-select: none;
+    transition: background .2s;
+  }
+  .toggle-wrap:hover { background: rgba(255,255,255,.1); }
+  .toggle-wrap label { font-size: .85rem; color: #ccc; cursor: pointer; white-space: nowrap; }
+
+  .toggle-track {
+    width: 40px; height: 22px;
+    background: #333;
+    border-radius: 11px;
+    position: relative;
+    transition: background .25s;
+    flex-shrink: 0;
+  }
+  .toggle-track.on { background: #2ECC71; }
+  .toggle-thumb {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 16px; height: 16px;
+    background: #fff;
+    border-radius: 50%;
+    transition: transform .25s;
+    box-shadow: 0 1px 4px rgba(0,0,0,.4);
+  }
+  .toggle-track.on .toggle-thumb { transform: translateX(18px); }
+
+  /* Reset button */
+  #resetBtn {
+    padding: 8px 20px;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 40px;
+    background: rgba(255,255,255,.06);
+    color: #ccc;
+    font-family: 'Baloo 2', cursive;
+    font-size: .85rem;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  #resetBtn:hover { background: rgba(255,107,53,.25); border-color: var(--orange); color: #fff; }
+
+  /* Counter badge */
+  #topicCount {
+    font-size: .8rem; color: #888;
+    letter-spacing: 1px;
+  }
+  #topicCount span { color: var(--gold); font-weight: 700; }
+
+  /* All done message */
+  #allDone {
+    display: none;
+    position: fixed; inset: 0; z-index: 800;
+    background: rgba(0,0,0,.85);
+    backdrop-filter: blur(8px);
+    flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; gap: 16px;
+  }
+  #allDone h2 { font-size: 2.5rem; color: var(--gold); }
+  #allDone p { color: #aaa; font-size: 1.1rem; }
+  #allDone button {
+    margin-top: 10px;
+    padding: 14px 40px;
+    border: none; border-radius: 50px;
+    background: linear-gradient(135deg, var(--orange), var(--pink));
+    color: #fff; font-family: 'Baloo 2', cursive;
+    font-size: 1.1rem; font-weight: 800; cursor: pointer;
+    box-shadow: 0 6px 30px rgba(255,61,127,.5);
+    transition: transform .15s;
+  }
+  #allDone button:hover { transform: scale(1.05); }
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+<div id="flash"></div>
+
+<div id="header">
+  <div style="font-size:.85rem; letter-spacing:3px; text-transform:uppercase; color:#888; margin-bottom:4px;">Meeting #426 &nbsp;·&nbsp; BTM Toastmasters Club</div>
+  <h1>🎯 Table Topics Spinner</h1>
+  <p>Spin the wheel · Pick a topic · Own the stage</p>
+</div>
+
+<div id="main">
+  <div id="wheel-wrap">
+    <div id="pointer"></div>
+    <canvas id="wheel" width="340" height="340"></canvas>
+    <button id="spinBtn">🎲 SPIN!</button>
+
+    <div id="controls">
+      <div class="toggle-wrap" id="removeToggleWrap">
+        <div class="toggle-track" id="removeTrack"><div class="toggle-thumb"></div></div>
+        <label>Remove after spin</label>
+      </div>
+      <button id="resetBtn">↺ Reset All</button>
+    </div>
+    <div id="topicCount"><span id="countNum">10</span> topics remaining</div>
+  </div>
+
+  <div id="topic-panel">
+    <div id="idle-msg">⬅ Spin the wheel to get your topic!</div>
+    <div id="topic-result" style="display:none; width:100%;">
+      <div id="topic-icon"></div>
+      <div id="topic-title"></div>
+      <div id="topic-scenario"></div>
+
+    </div>
+  </div>
+</div>
+
+<div id="topics-list"></div>
+
+<button id="musicBtn" title="Toggle music">🎵</button>
+
+<div id="allDone">
+  <div style="font-size:4rem">🎉</div>
+  <h2>All Topics Done!</h2>
+  <p>Every topic has been covered. Great session!</p>
+  <button id="allDoneReset">↺ Start Fresh</button>
+</div>
+
+<script>
+// ──────────────────────────────────────
+// DATA
+// ──────────────────────────────────────
+const topics = [
+  {
+    icon: "☕",
+    label: "Chai\nvs Coffee",
+    title: "Chai vs Coffee",
+    scenario: "Two people trying to convert each other — emotion vs productivity.",
+    prompt: 'Defend your brew to the last sip!'
+  },
+  {
+    icon: "📱",
+    label: "iPhone\nvs Android",
+    title: "iPhone vs Android",
+    scenario: "Two friends buying a new phone — premium vs practicality debate.",
+    prompt: '"iPhone is a lifestyle." "Android is freedom." "One is status, one is smartness."'
+  },
+  {
+    icon: "💻",
+    label: "WFH\nvs Office",
+    title: "Work From Home vs Office",
+    scenario: "A company deciding permanent work culture — comfort vs career growth.",
+    prompt: '"WFH: where camera off = life on." "Office: where coffee free, but peace costly."'
+  },
+  {
+    icon: "🏠",
+    label: "Real Estate\nvs Tenant",
+    title: "Real Estate Agent vs Smart Tenant",
+    scenario: "An overconfident agent selling a 'luxury' 2BHK meets a sharp tenant spotting every flaw.",
+    prompt: '"Sir, ventilation natural hai… hawa kabhi kabhi aati hai."'
+  },
+  {
+    icon: "🏏",
+    label: "RCB Fan\nvs CSK Fan",
+    title: "RCB Fan vs CSK Fan",
+    scenario: "Two IPL fans watching a live match together, defending their teams with emotions, stats, and blind faith.",
+    prompt: '"RCB has hope." "CSK has trophies."'
+  },
+  {
+    icon: "📜",
+    label: "Shakespeare\nvs Karan Johar",
+    title: "William Shakespeare vs Karan Johar",
+    scenario: "The king of classic literature meets the king of Bollywood drama.",
+    prompt: 'Debate storytelling — deep tragedy vs dramatic family emotions.'
+  },
+  {
+    icon: "🎥",
+    label: "Parent vs\nYouTuber",
+    title: "Parent vs YouTuber Child",
+    scenario: "Child wants YouTube career. Parent wants government job.",
+    prompt: 'Stability vs passion battle!'
+  },
+  {
+    icon: "🌴",
+    label: "Goa\nvs Mumbai",
+    title: "Goa vs Mumbai",
+    scenario: "Trip planning — only one destination allowed.",
+    prompt: '"Goa: susegad life." "Mumbai: struggle life."'
+  },
+  {
+    icon: "⏳",
+    label: "Gandhi\nvs Kejriwal",
+    title: "Mahatma Gandhi vs Arvind Kejriwal",
+    scenario: "Freedom fighter meets modern politician — Old India vs New India debate.",
+    prompt: '"Main satyagraha karta tha." "Main subsidy graha karta hoon."'
+  },
+  {
+    icon: "🚀",
+    label: "Einstein\nvs Elon Musk",
+    title: "Albert Einstein vs Elon Musk",
+    scenario: "The father of modern physics meets the face of futuristic tech.",
+    prompt: 'Theory vs execution — who changed the world more?'
+  }
+];
+
+// Sector colors — vibrant festival palette
+const sectorColors = [
+  "#FF6B35","#FFD700","#2ECC71","#00BCD4","#9B59B6",
+  "#FF3D7F","#F39C12","#1ABC9C","#E74C3C","#3498DB"
+];
+
+// ──────────────────────────────────────
+// STARFIELD
+// ──────────────────────────────────────
+(function createStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%; top:${Math.random()*100}%;
+      --d:${(Math.random()*3+1).toFixed(1)}s;
+      animation-delay:${(Math.random()*3).toFixed(1)}s;
+    `;
+    container.appendChild(s);
+  }
+})();
+
+// ──────────────────────────────────────
+// TOPICS LIST (sidebar)
+// ──────────────────────────────────────
+topics.forEach((t, i) => t.originalIndex = i); // stable color index
+
+const tl = document.getElementById('topics-list');
+topics.forEach((t, i) => {
+  const div = document.createElement('div');
+  div.className = 'tl-item';
+  div.id = `tl-${i}`;
+  div.textContent = `${t.icon} ${t.title.split(' vs ')[0]}`;
+  tl.appendChild(div);
+});
+
+// ──────────────────────────────────────
+// WHEEL DRAWING
+// ──────────────────────────────────────
+const allTopics = topics.slice(); // master copy
+let activeTopics = topics.slice(); // mutable working set
+let removeMode = false;
+
+const canvas = document.getElementById('wheel');
+const ctx = canvas.getContext('2d');
+const cx = canvas.width / 2;
+const cy = canvas.height / 2;
+const radius = cx - 4;
+
+let currentAngle = 0;
+
+function getN()   { return activeTopics.length; }
+function getArc() { return (2 * Math.PI) / getN(); }
+
+function updateCountBadge() {
+  document.getElementById('countNum').textContent = activeTopics.length;
+}
+
+function drawWheel(angle) {
+  const N = getN();
+  const arc = getArc();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Outer ring glow
+  ctx.save();
+  ctx.shadowBlur = 20;
+  ctx.shadowColor = '#FFD700';
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius + 2, 0, Math.PI * 2);
+  ctx.strokeStyle = '#FFD70066';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+  ctx.restore();
+
+  for (let i = 0; i < N; i++) {
+    const startAngle = angle + i * arc;
+    const endAngle = startAngle + arc;
+    const mid = startAngle + arc / 2;
+
+    // Sector
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, radius, startAngle, endAngle);
+    ctx.closePath();
+    ctx.fillStyle = sectorColors[activeTopics[i].originalIndex % sectorColors.length];
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(0,0,0,.25)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Icon only — labels hidden to keep audience in suspense
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(mid);
+    ctx.textAlign = 'center';
+    ctx.font = '20px serif';
+    ctx.shadowBlur = 0;
+    ctx.fillText(activeTopics[i].icon, radius - 30, 7);
+    ctx.restore();
+  }
+
+  // Center circle
+  const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 36);
+  grad.addColorStop(0, '#fff');
+  grad.addColorStop(1, '#FFD700');
+  ctx.beginPath();
+  ctx.arc(cx, cy, 36, 0, Math.PI * 2);
+  ctx.fillStyle = grad;
+  ctx.shadowColor = '#FFD700';
+  ctx.shadowBlur = 20;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  ctx.fillStyle = '#222';
+  ctx.font = 'bold 13px "Baloo 2", cursive';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('SPIN', cx, cy);
+}
+
+drawWheel(currentAngle);
+updateCountBadge();
+
+// ──────────────────────────────────────
+// AUDIO — Lo-Fi Hip-Hop System
+// ──────────────────────────────────────
+let audioCtx = null;
+let musicOn  = true;
+let masterGain = null;
+let lofiTimer  = null;
+let crackleNode = null;
+
+const BPM  = 82;
+const BEAT = 60 / BPM;          // ~0.732 s
+const BAR  = BEAT * 4;          // ~2.927 s
+const SWING = BEAT * 0.055;     // subtle swing on 8th offbeats
+
+// Chord progression — each chord lasts 2 bars, loops every 8 bars
+// Voicings: bass (low), mid-piano, top-piano
+const CHORDS = [
+  { b: 65.41,  mid: [261.63, 329.63, 392.00], top: [523.25, 659.25] }, // Cmaj7
+  { b: 110.00, mid: [220.00, 261.63, 329.63], top: [440.00, 523.25] }, // Am7
+  { b: 87.31,  mid: [174.61, 220.00, 261.63], top: [349.23, 440.00] }, // Fmaj7
+  { b: 98.00,  mid: [196.00, 246.94, 293.66], top: [392.00, 493.88] }, // G7
+];
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+// ── Build master signal chain ──────────────────────
+function buildMasterChain(ac) {
+  // Warm lo-fi tone: low-pass → soft compressor → gain
+  const lpf = ac.createBiquadFilter();
+  lpf.type = 'lowpass';
+  lpf.frequency.value = 4200;
+  lpf.Q.value = 0.5;
+
+  // Slight tape saturation via waveshaper
+  const ws = ac.createWaveShaper();
+  const curve = new Float32Array(256);
+  for (let i = 0; i < 256; i++) {
+    const x = (i * 2) / 256 - 1;
+    curve[i] = (Math.PI + 200) * x / (Math.PI + 200 * Math.abs(x));
+  }
+  ws.curve = curve;
+  ws.oversample = '2x';
+
+  const comp = ac.createDynamicsCompressor();
+  comp.threshold.value = -16; comp.knee.value = 8;
+  comp.ratio.value = 4; comp.attack.value = 0.004; comp.release.value = 0.18;
+
+  masterGain = ac.createGain();
+  masterGain.gain.setValueAtTime(0, ac.currentTime);
+  masterGain.gain.linearRampToValueAtTime(0.72, ac.currentTime + 3.5);
+
+  lpf.connect(ws); ws.connect(comp); comp.connect(masterGain); masterGain.connect(ac.destination);
+  return lpf; // return input node
+}
+
+// ── Convolution reverb ─────────────────────────────
+function makeReverb(ac, secs = 1.8, wet = 0.35) {
+  const len = ac.sampleRate * secs;
+  const buf = ac.createBuffer(2, len, ac.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = buf.getChannelData(c);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+  }
+  const conv = ac.createConvolver(); conv.buffer = buf;
+  const dry = ac.createGain(); dry.gain.value = 1 - wet;
+  const wt  = ac.createGain(); wt.gain.value  = wet;
+  conv.connect(wt);
+  return { input: conv, dry, wet: wt }; // caller routes: src→dry→dest  AND  src→conv→wet→dest
+}
+
+// ── Vinyl crackle ──────────────────────────────────
+function startCrackle(ac, dest) {
+  const dur = 12;
+  const buf = ac.createBuffer(1, ac.sampleRate * dur, ac.sampleRate);
+  const d   = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) {
+    // sparse pops + continuous low hiss
+    d[i] = Math.random() < 0.0004
+      ? (Math.random() - 0.5) * 0.9
+      : (Math.random() - 0.5) * 0.018;
+  }
+  crackleNode = ac.createBufferSource();
+  crackleNode.buffer = buf;
+  crackleNode.loop = true;
+
+  const bp  = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 900; bp.Q.value = 0.4;
+  const lpf = ac.createBiquadFilter(); lpf.type = 'lowpass';  lpf.frequency.value = 3000;
+  const g   = ac.createGain();         g.gain.value = 0.55;
+
+  crackleNode.connect(bp); bp.connect(lpf); lpf.connect(g); g.connect(dest);
+  crackleNode.start();
+}
+
+// ── Rhodes-style piano note ────────────────────────
+function pianoNote(ac, dest, freq, t, dur, vel = 0.18) {
+  // triangle (fundamental) + slight 2nd harmonic for Rhodes warmth
+  [1, 2.002].forEach((mult, hi) => {
+    const o = ac.createOscillator();
+    o.type = 'triangle';
+    o.frequency.value = freq * mult;
+    const g = ac.createGain();
+    const v = hi === 0 ? vel : vel * 0.12;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(v, t + 0.008);
+    g.gain.exponentialRampToValueAtTime(v * 0.45, t + 0.06);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest);
+    o.start(t); o.stop(t + dur + 0.05);
+  });
+}
+
+// ── Bass note (sine, punchy) ───────────────────────
+function bassNote(ac, dest, freq, t) {
+  const o = ac.createOscillator(); o.type = 'sine'; o.frequency.value = freq;
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.55, t + 0.015);
+  g.gain.exponentialRampToValueAtTime(0.18, t + BEAT * 0.7);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + BEAT * 1.9);
+  // Sub-bass low-pass
+  const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 280;
+  o.connect(lp); lp.connect(g); g.connect(dest);
+  o.start(t); o.stop(t + BEAT * 2);
+}
+
+// ── Kick drum ──────────────────────────────────────
+function kick(ac, dest, t) {
+  const o = ac.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(115, t);
+  o.frequency.exponentialRampToValueAtTime(38, t + 0.12);
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0.9, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+  o.connect(g); g.connect(dest);
+  o.start(t); o.stop(t + 0.24);
+}
+
+// ── Snare (brushed, lo-fi) ─────────────────────────
+function snare(ac, dest, t, vel = 0.22) {
+  const len = ~~(ac.sampleRate * 0.18);
+  const buf = ac.createBuffer(1, len, ac.sampleRate);
+  const d   = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+
+  const src = ac.createBufferSource(); src.buffer = buf;
+  const bp  = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1600; bp.Q.value = 1.1;
+  const lp  = ac.createBiquadFilter(); lp.type = 'lowpass';  lp.frequency.value = 5000;
+  const g   = ac.createGain();
+  g.gain.setValueAtTime(vel, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+
+  src.connect(bp); bp.connect(lp); lp.connect(g); g.connect(dest);
+  src.start(t); src.stop(t + 0.2);
+}
+
+// ── Hi-hat ────────────────────────────────────────
+function hihat(ac, dest, t, open = false, vel = 0.07) {
+  const len = ~~(ac.sampleRate * (open ? 0.22 : 0.04));
+  const buf = ac.createBuffer(1, len, ac.sampleRate);
+  const d   = buf.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+
+  const src = ac.createBufferSource(); src.buffer = buf;
+  const hp  = ac.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 9000;
+  const g   = ac.createGain();
+  g.gain.setValueAtTime(vel, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + (open ? 0.18 : 0.035));
+
+  src.connect(hp); hp.connect(g); g.connect(dest);
+  src.start(t); src.stop(t + 0.25);
+}
+
+// ── Schedule one bar of lo-fi music ───────────────
+function scheduleBar(ac, dest, rev, barT, barIdx) {
+  const chord = CHORDS[Math.floor(barIdx / 2) % CHORDS.length];
+  const h = (n) => n + (Math.random() - 0.5) * 0.009; // humanize
+
+  // ── Piano chord on beat 1
+  chord.mid.forEach((f, i) => pianoNote(ac, dest, f, barT + i * 0.016, BEAT * 3.2, 0.15 - i * 0.02));
+  chord.top.forEach((f, i) => pianoNote(ac, dest, f, barT + i * 0.022, BEAT * 2.4, 0.09));
+
+  // ── Arpeggiated mid notes on beats 2–4 (random walk through chord tones)
+  const arpPool = [...chord.mid, ...chord.top];
+  [1, 2, 3].forEach(beat => {
+    const f = arpPool[Math.floor(Math.random() * arpPool.length)];
+    if (Math.random() > 0.25)
+      pianoNote(ac, dest, f, h(barT + BEAT * beat), BEAT * 0.75, 0.07);
+  });
+
+  // ── Bass: beat 1 and a ghost on beat 3
+  bassNote(ac, dest, chord.b, h(barT));
+  if (Math.random() > 0.3) bassNote(ac, dest, chord.b * 1.5, h(barT + BEAT * 2), );
+
+  // ── Kick: beat 1, optional beat 2.5 or 3
+  kick(ac, dest, h(barT));
+  if (Math.random() > 0.45) kick(ac, dest, h(barT + BEAT * 2 + BEAT * 0.5));
+  else                       kick(ac, dest, h(barT + BEAT * 2));
+
+  // ── Snare: beat 2 and beat 4 with swing feel
+  snare(ac, dest, h(barT + BEAT + SWING), 0.18 + Math.random() * 0.06);
+  snare(ac, dest, h(barT + BEAT * 3 + SWING), 0.20 + Math.random() * 0.06);
+
+  // ── Hi-hats: 8th notes with swing on offbeats, occasional open hat
+  for (let e = 0; e < 8; e++) {
+    if (Math.random() < 0.1) continue; // ghost / miss for humanization
+    const isOff = e % 2 === 1;
+    const tHat  = barT + e * (BEAT / 2) + (isOff ? SWING : 0) + (Math.random() - 0.5) * 0.006;
+    const open  = isOff && Math.random() < 0.15;
+    const vel   = isOff ? 0.042 + Math.random() * 0.02 : 0.065 + Math.random() * 0.02;
+    hihat(ac, dest, tHat, open, vel);
+  }
+
+  // ── Reverb send for piano
+  chord.mid.forEach(f => pianoNote(ac, rev.input, f, barT, BEAT * 2.5, 0.04));
+  rev.wet.connect(dest);
+}
+
+// ── Main scheduler (look-ahead pattern) ───────────
+let _nextBarTime = 0;
+let _barIdx      = 0;
+let _revRef      = null;
+let _spinMusicTimer = null;
+
+function startBgMusic() {
+  if (!musicOn) return;
+  const ac   = getAudioCtx();
+  const dest = buildMasterChain(ac);
+  _revRef    = makeReverb(ac, 2.0, 0.28);
+  startCrackle(ac, dest);
+
+  _nextBarTime = ac.currentTime + 0.4;
+  _barIdx      = 0;
+
+  (function scheduler() {
+    if (!musicOn) return;
+    const now = getAudioCtx().currentTime;
+    while (_nextBarTime < now + 0.35) {
+      scheduleBar(ac, dest, _revRef, _nextBarTime, _barIdx);
+      _nextBarTime += BAR;
+      _barIdx++;
+    }
+    lofiTimer = setTimeout(scheduler, 80);
+  })();
+}
+
+function stopBgMusic() {
+  clearTimeout(lofiTimer);
+  if (masterGain) {
+    const ac = getAudioCtx();
+    masterGain.gain.linearRampToValueAtTime(0, ac.currentTime + 1.8);
+  }
+  if (crackleNode) { try { crackleNode.stop(); } catch(e){} crackleNode = null; }
+}
+
+function playSpinMusicFor(ms) {
+  if (!musicOn) return;
+  clearTimeout(_spinMusicTimer);
+  startBgMusic();
+  _spinMusicTimer = setTimeout(() => {
+    stopBgMusic();
+  }, ms);
+}
+
+// ── Gentle tick during spin ────────────────────────
+function playTickSound() {
+  const ac = getAudioCtx();
+  const t  = ac.currentTime;
+  const o  = ac.createOscillator(); o.type = 'sine';
+  o.frequency.setValueAtTime(480, t);
+  o.frequency.exponentialRampToValueAtTime(180, t + 0.055);
+  const g  = ac.createGain();
+  g.gain.setValueAtTime(0.065, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.06);
+  o.connect(g); g.connect(ac.destination);
+  o.start(t); o.stop(t + 0.07);
+}
+
+// ── Win fanfare — warm lo-fi chord reveal ─────────
+function playWinFanfare() {
+  const ac  = getAudioCtx();
+  const rev = makeReverb(ac, 2.2, 0.5);
+  const out = ac.createGain(); out.gain.value = 0.85; out.connect(ac.destination);
+  rev.wet.connect(out);
+
+  const notes  = [523.25, 659.25, 783.99, 1046.5, 1318.5];
+  const timing = [0,       0.16,   0.30,   0.46,   0.66 ];
+  notes.forEach((f, i) => {
+    const t = ac.currentTime + timing[i];
+    pianoNote(ac, out,       f, t, 2.0, 0.20);
+    pianoNote(ac, rev.input, f, t, 2.0, 0.12);
+  });
+}
+
+// ── Spin tension — lo-fi filter sweep swell ───────
+function playDrumRoll(duration) {
+  const ac = getAudioCtx();
+  // Rising filtered noise swell (tape-style)
+  const buf = ac.createBuffer(1, ~~(ac.sampleRate * duration), ac.sampleRate);
+  const d   = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+
+  const src = ac.createBufferSource(); src.buffer = buf;
+  const bp  = ac.createBiquadFilter(); bp.type = 'bandpass';
+  bp.frequency.setValueAtTime(300, ac.currentTime);
+  bp.frequency.linearRampToValueAtTime(2200, ac.currentTime + duration);
+  bp.Q.value = 2.5;
+
+  const g = ac.createGain();
+  g.gain.setValueAtTime(0, ac.currentTime);
+  g.gain.linearRampToValueAtTime(0.06, ac.currentTime + duration * 0.5);
+  g.gain.linearRampToValueAtTime(0.0001, ac.currentTime + duration);
+
+  src.connect(bp); bp.connect(g); g.connect(ac.destination);
+  src.start(ac.currentTime); src.stop(ac.currentTime + duration + 0.1);
+}
+
+// ──────────────────────────────────────
+// SPIN LOGIC
+// ──────────────────────────────────────
+const spinBtn = document.getElementById('spinBtn');
+let spinning = false;
+let nextSpinIndex = 0;
+
+spinBtn.addEventListener('click', () => {
+  if (spinning) return;
+  getAudioCtx().resume();
+  spin();
+});
+
+function spin() {
+  spinning = true;
+  spinBtn.disabled = true;
+  document.getElementById('idle-msg').style.display = 'none';
+  document.getElementById('topic-result').style.display = 'none';
+
+  const duration = 5000;
+  playSpinMusicFor(duration);
+  const startAngle = currentAngle;
+  const startTime = performance.now();
+
+  const arc = getArc();
+  const targetSector = nextSpinIndex % activeTopics.length;
+  const sectorCenter = -Math.PI / 2 - (targetSector + 0.5) * arc;
+  const jitter = (Math.random() * 0.6 - 0.3) * arc;
+  const targetAngle = sectorCenter + jitter;
+  const spins = 6 * Math.PI * 2;
+  const totalRotation = targetAngle + spins - startAngle;
+
+  playDrumRoll(duration / 1000 - 0.5);
+
+  let lastSector = -1;
+
+  function animate(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const ease = easeOut(progress);
+    const angle = startAngle + totalRotation * ease;
+    currentAngle = angle;
+    drawWheel(angle);
+
+    const sector = getSectorAtPointer(angle);
+    if (sector !== lastSector) {
+      playTickSound();
+      lastSector = sector;
+    }
+
+    if (progress < 1) {
+      requestAnimationFrame(animate);
+    } else {
+      stopBgMusic(); // ensure music is only during the spin window
+      currentAngle = angle % (2 * Math.PI);
+      spinning = false;
+      spinBtn.disabled = false;
+      const winner = getSectorAtPointer(currentAngle);
+      onWin(winner);
+      if (!removeMode) {
+        nextSpinIndex = (nextSpinIndex + 1) % activeTopics.length;
+      }
+    }
+  }
+
+  requestAnimationFrame(animate);
+}
+
+function easeOut(t) {
+  return 1 - Math.pow(1 - t, 4);
+}
+
+function getSectorAtPointer(angle) {
+  const N = getN();
+  const arc = getArc();
+  const normalized = (((-Math.PI / 2) - angle) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
+  return Math.floor(normalized / arc) % N;
+}
+
+function onWin(index) {
+  const topic = activeTopics[index];
+
+  // Flash
+  const flash = document.getElementById('flash');
+  flash.classList.add('active');
+  setTimeout(() => flash.classList.remove('active'), 400);
+
+  playWinFanfare();
+  launchConfetti(80);
+
+  document.getElementById('topic-icon').textContent = topic.icon;
+  document.getElementById('topic-title').textContent = topic.title;
+  document.getElementById('topic-scenario').textContent = topic.scenario;
+  document.getElementById('topic-result').style.display = 'block';
+
+  // Remove from wheel if toggle is on
+  if (removeMode) {
+    setTimeout(() => {
+      activeTopics.splice(index, 1);
+      if (nextSpinIndex >= activeTopics.length) {
+        nextSpinIndex = 0;
+      }
+      updateCountBadge();
+      currentAngle = 0; // reset angle so wheel looks clean
+      drawWheel(currentAngle);
+
+      if (activeTopics.length === 0) {
+        document.getElementById('allDone').style.display = 'flex';
+        spinBtn.disabled = true;
+      }
+    }, 800); // short delay so wheel stays visible during reveal
+  }
+}
+
+// ──────────────────────────────────────
+// CONFETTI
+// ──────────────────────────────────────
+const confettiColors = ['#FFD700','#FF6B35','#FF3D7F','#00F5FF','#2ECC71','#9B59B6','#fff'];
+
+function launchConfetti(count) {
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'confetti';
+      el.style.cssText = `
+        left: ${Math.random() * 100}vw;
+        background: ${confettiColors[Math.floor(Math.random() * confettiColors.length)]};
+        width: ${Math.random() * 10 + 6}px;
+        height: ${Math.random() * 14 + 8}px;
+        border-radius: ${Math.random() > 0.5 ? '50%' : '2px'};
+        animation-duration: ${(Math.random() * 2 + 2).toFixed(1)}s;
+        animation-delay: 0s;
+      `;
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 5000);
+    }, i * 25);
+  }
+}
+
+// ──────────────────────────────────────
+// REMOVE TOGGLE
+// ──────────────────────────────────────
+document.getElementById('removeToggleWrap').addEventListener('click', () => {
+  removeMode = !removeMode;
+  document.getElementById('removeTrack').classList.toggle('on', removeMode);
+});
+
+// ──────────────────────────────────────
+// RESET
+// ──────────────────────────────────────
+function resetTopics() {
+  activeTopics = allTopics.map(t => Object.assign({}, t));
+  currentAngle = 0;
+  nextSpinIndex = 0;
+  document.getElementById('allDone').style.display = 'none';
+  document.getElementById('idle-msg').style.display = 'block';
+  document.getElementById('topic-result').style.display = 'none';
+  spinBtn.disabled = false;
+  updateCountBadge();
+  drawWheel(currentAngle);
+}
+
+document.getElementById('resetBtn').addEventListener('click', resetTopics);
+document.getElementById('allDoneReset').addEventListener('click', resetTopics);
+
+// ──────────────────────────────────────
+// MUSIC TOGGLE
+// ──────────────────────────────────────
+document.getElementById('musicBtn').addEventListener('click', () => {
+  musicOn = !musicOn;
+  document.getElementById('musicBtn').textContent = musicOn ? '🎵' : '🔇';
+  stopBgMusic();
+});
+
+// ──────────────────────────────────────
+// INITIAL DRAW
+// ──────────────────────────────────────
+updateCountBadge();
+drawWheel(currentAngle);
+</script>
+</body>
+</html>
