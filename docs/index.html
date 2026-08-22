@@ -161,10 +161,6 @@
     margin-bottom: 12px; line-height: 1.3;
     animation: slideUp .4s ease;
   }
-  #topic-scenario {
-    font-size: .9rem; color: #ddd; line-height: 1.6;
-    animation: fadeIn .6s ease;
-  }
   #topic-prompt {
     margin-top: 14px;
     font-size: .85rem; color: var(--cyan);
@@ -341,8 +337,6 @@
     <div id="topic-result" style="display:none; width:100%;">
       <div id="topic-icon"></div>
       <div id="topic-title"></div>
-      <div id="topic-scenario"></div>
-
     </div>
   </div>
 </div>
@@ -364,74 +358,58 @@
 // ──────────────────────────────────────
 const topics = [
   {
-    icon: "☕",
-    label: "Chai\nvs Coffee",
-    title: "Chai vs Coffee",
-    scenario: "Two people trying to convert each other / emotion vs productivity.",
-    prompt: 'Defend your brew to the last sip!'
+    icon: "✈️",
+    label: "Best Trip",
+    title: "What’s the best trip you’ve ever taken, and why was it so special?",
+    prompt: "Tell the story of the trip that stayed with you long after it ended."
   },
   {
-    icon: "📱",
-    label: "iPhone\nvs Android",
-    title: "iPhone vs Android",
-    scenario: "Two friends buying a new phone / premium vs practicality debate.",
-    prompt: '"iPhone is a lifestyle." "Android is freedom." "One is status, one is smartness."'
+    icon: "⏰",
+    label: "Time Travel",
+    title: "If you could go back in time and witness any event what would it be and why?",
+    prompt: "Choose the event and explain why you’d want to witness it firsthand."
   },
   {
-    icon: "💻",
-    label: "WFH\nvs Office",
-    title: "Work From Home vs Office",
-    scenario: "A company deciding permanent work culture / comfort vs career growth.",
-    prompt: '"WFH: where camera off = life on." "Office: where coffee free, but peace costly."'
+    icon: "🛗",
+    label: "Celebrity Lift",
+    title: "If you were stuck in a lift with a celebrity, who would you choose, and what would you talk about?",
+    prompt: "Pick your celebrity and reveal your lift-time conversation plan."
   },
   {
-    icon: "🚀",
-    label: "Einstein\nvs Elon Musk",
-    title: "Albert Einstein vs Elon Musk",
-    scenario: "The father of modern physics meets the face of futuristic tech.",
-    prompt: 'Theory vs execution - who changed the world more?'
+    icon: "🎭",
+    label: "Useless Talent",
+    title: "What’s the most useless talent you have?",
+    prompt: "Explain why your talent is impressive in theory, but not in real life."
   },
   {
-    icon: "🏏",
-    label: "RCB Fan\nvs CSK Fan",
-    title: "RCB Fan vs CSK Fan",
-    scenario: "Two IPL fans watching a live match together, defending their teams with emotions, stats, and blind faith.",
-    prompt: '"RCB has hope." "CSK has trophies."'
+    icon: "💸",
+    label: "Spend 1 Lakh",
+    title: "If you were given 1 lakh that you had to spend immediately, what would you buy?",
+    prompt: "Describe the impulsive purchase spree you’d go on without thinking twice."
   },
   {
-    icon: "📜",
-    label: "Shakespeare\nvs Karan Johar",
-    title: "William Shakespeare vs Karan Johar",
-    scenario: "The king of classic literature meets the king of Bollywood drama.",
-    prompt: 'Debate storytelling - deep tragedy vs dramatic family emotions.'
+    icon: "🍽️",
+    label: "Weird Food",
+    title: "What’s the weirdest food combination that you’ve ever eaten?",
+    prompt: "Tell the story behind the strangest bite you ever dared to try."
   },
   {
-    icon: "🎥",
-    label: "Parent vs\nYouTuber",
-    title: "Parent vs YouTuber Child",
-    scenario: "Child wants YouTube career. Parent wants government job.",
-    prompt: 'Stability vs passion battle!'
+    icon: "🎉",
+    label: "Public Holiday",
+    title: "What is your favourite public holiday and why?",
+    prompt: "Give the holiday you love most and the reason it makes you smile."
   },
   {
-    icon: "🌴",
-    label: "Goa\nvs Mumbai",
-    title: "Goa vs Mumbai",
-    scenario: "Trip planning / only one destination allowed.",
-    prompt: '"Goa: susegad life." "Mumbai: struggle life."'
+    icon: "🧠",
+    label: "Psychology\nFun Fact",
+    title: "What’s your favorite psychological fun fact that always surprises people?",
+    prompt: "Share the fact that makes people say, ‘Wait, really?’"
   },
   {
-    icon: "⏳",
-    label: "Gandhi\nvs Kejriwal",
-    title: "Mahatma Gandhi vs Arvind Kejriwal",
-    scenario: "Freedom fighter meets modern politician / Old India vs New India debate.",
-    prompt: '"Main satyagraha karta tha." "Main subsidy graha karta hoon."'
-  },
-  {
-    icon: "🏠",
-    label: "Real Estate\nvs Tenant",
-    title: "Real Estate Agent vs Smart Tenant",
-    scenario: "An overconfident agent selling a 'luxury' 2BHK meets a sharp tenant spotting every flaw.",
-    prompt: '"Sir, ventilation natural hai… hawa kabhi kabhi aati hai."'
+    icon: "🌱",
+    label: "Life Lesson",
+    title: "What life lesson did you learn the hard way?",
+    prompt: "Share the lesson that changed you, even if it came with a painful price."
   }
 ];
 
@@ -972,7 +950,6 @@ function onWin(index) {
 
   document.getElementById('topic-icon').textContent = topic.icon;
   document.getElementById('topic-title').textContent = topic.title;
-  document.getElementById('topic-scenario').textContent = topic.scenario;
   document.getElementById('topic-result').style.display = 'block';
 
   // Remove from wheel if toggle is on
